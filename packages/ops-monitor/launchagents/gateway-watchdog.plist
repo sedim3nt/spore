@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Gateway Watchdog LaunchAgent
+  
+  CUSTOMIZE:
+  1. Replace /Users/YOU with your actual home directory
+  2. Adjust StartInterval (seconds) — 300 = every 5 minutes
+  3. Run to install:
+     cp gateway-watchdog.plist ~/Library/LaunchAgents/com.openclaw.gateway-watchdog.plist
+     launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.openclaw.gateway-watchdog.plist
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.openclaw.gateway-watchdog</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <!-- CUSTOMIZE: Update this path to where you installed gateway-watchdog.sh -->
+        <string>/Users/YOU/scripts/gateway-watchdog.sh</string>
+    </array>
+
+    <!-- Run every 5 minutes -->
+    <key>StartInterval</key>
+    <integer>300</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/openclaw/gateway-watchdog-stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/openclaw/gateway-watchdog-stderr.log</string>
+
+    <!-- CUSTOMIZE: Update PATH to include your homebrew and local binaries -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <!-- CUSTOMIZE: Your home directory -->
+        <string>/Users/YOU</string>
+    </dict>
+</dict>
+</plist>

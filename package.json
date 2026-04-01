@@ -1,0 +1,22 @@
+{
+  "name": "@spirittree/spore",
+  "version": "0.1.0",
+  "description": "Production-ready AI agent configurations. The open source agent library from SpiritTree.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sedim3nt/spore.git"
+  },
+  "keywords": ["ai", "agents", "openclaw", "claude", "configuration", "automation"],
+  "author": "Sedim3nt <terraloam@gmail.com>",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "files": ["dist", "agents", "skills", "guides", "README.md", "LICENSE"],
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

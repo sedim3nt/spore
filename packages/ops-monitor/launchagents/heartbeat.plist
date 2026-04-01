@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Heartbeat LaunchAgent
+  Runs the infrastructure health check every 75 minutes.
+
+  CUSTOMIZE:
+  1. Replace /Users/YOU with your home directory
+  2. Adjust StartInterval if desired (4500 seconds = 75 minutes)
+  3. Install:
+     cp heartbeat.plist ~/Library/LaunchAgents/com.openclaw.heartbeat.plist
+     launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.openclaw.heartbeat.plist
+
+  To check status:
+     launchctl print gui/$(id -u)/com.openclaw.heartbeat
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.openclaw.heartbeat</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <!-- CUSTOMIZE: Path to heartbeat-check.sh -->
+        <string>/Users/YOU/scripts/heartbeat-check.sh</string>
+    </array>
+
+    <!-- Run every 75 minutes -->
+    <key>StartInterval</key>
+    <integer>4500</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/openclaw/heartbeat-stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/openclaw/heartbeat-stderr.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <!-- CUSTOMIZE: Your home directory -->
+        <string>/Users/YOU</string>
+        <!-- CUSTOMIZE: Add your OpenClaw workspace path -->
+        <key>OPENCLAW_WORKSPACE</key>
+        <string>/Users/YOU/.openclaw/workspace</string>
+    </dict>
+</dict>
+</plist>

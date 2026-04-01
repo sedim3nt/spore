@@ -1,0 +1,19 @@
+{
+  "_comment": "Agent status file. Each agent writes its own version to content/agent-status/[agent-name].json",
+  "agent": "<!-- agent name: orchestrator, research, builder, writer, ops, artist -->",
+  "status": "<!-- idle | working | blocked | complete | error -->",
+  "task": "<!-- current task name or null -->",
+  "task_file": "<!-- path to task spec, or null -->",
+  "last_updated": "<!-- ISO 8601 timestamp -->",
+  "blocking": "<!-- null, or description of what's blocking -->",
+  "blocking_since": "<!-- ISO 8601 timestamp, or null -->",
+  "eta": "<!-- ISO 8601 timestamp estimate, or null -->",
+  "last_result": {
+    "task": "<!-- last completed task name -->",
+    "status": "<!-- success | failure | partial -->",
+    "summary": "<!-- 1-2 sentences -->",
+    "output_file": "<!-- path to output, or null -->",
+    "completed_at": "<!-- ISO 8601 timestamp -->"
+  },
+  "notes": "<!-- Any free-form notes for the orchestrator -->"
+}

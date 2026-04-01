@@ -1,0 +1,55 @@
+{
+  "_comment": "Social post queue. Add posts here; the social-posting cron picks them up daily.",
+  "_format": "Date keys (YYYY-MM-DD) contain platform-specific post content.",
+  "2026-03-18": {
+    "x": {
+      "text": "Your tweet text here. Under 280 characters.",
+      "scheduled_time": "12:00",
+      "status": "pending",
+      "posted_at": null,
+      "post_url": null
+    },
+    "bluesky": {
+      "text": "Your Bluesky post. Under 300 characters.",
+      "url": "https://optional-link-to-include.com",
+      "scheduled_time": "13:00",
+      "status": "pending",
+      "posted_at": null,
+      "post_url": null
+    },
+    "facebook": {
+      "paragraphs": [
+        "First paragraph of your Facebook post.",
+        "Second paragraph with more context.",
+        "Third paragraph with your call to action or link: https://yourlink.com"
+      ],
+      "scheduled_time": "18:00",
+      "status": "pending",
+      "posted_at": null,
+      "post_url": null
+    }
+  },
+  "2026-03-19": {
+    "x": {
+      "text": "Another tweet for tomorrow.",
+      "scheduled_time": "12:00",
+      "status": "pending",
+      "posted_at": null,
+      "post_url": null
+    }
+  },
+  "_thread_example": {
+    "x_thread": {
+      "tweets": [
+        "Tweet 1 — the hook",
+        "Tweet 2 — first point",
+        "Tweet 3 — second point",
+        "Tweet 4 — third point",
+        "Tweet 5 — conclusion",
+        "Tweet 6 — CTA: Full article: https://yourlink.com"
+      ],
+      "scheduled_time": "12:00",
+      "status": "pending"
+    }
+  }
+}

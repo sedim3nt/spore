@@ -1,0 +1,78 @@
+{
+  "mcpServers": {
+    "muninndb": {
+      "command": "python",
+      "args": ["-m", "muninndb_mcp.server"],
+      "env": {
+        "MUNINNDB_PATH": "/Users/agentorchard/.openclaw/muninndb",
+        "MUNINNDB_EMBEDDING_MODEL": "nomic-embed-text",
+        "MUNINNDB_OLLAMA_URL": "http://localhost:11434"
+      },
+      "description": "Local vector memory store — search and store agent memories"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/agentorchard/.openclaw/workspace"
+      ],
+      "description": "Read/write access to workspace files"
+    },
+    "notion": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-notion"],
+      "env": {
+        "NOTION_API_KEY": "${NOTION_API_KEY}"
+      },
+      "description": "Notion workspace as readable/writable knowledge base"
+    },
+    "sqlite": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sqlite",
+        "--db-path",
+        "/Users/agentorchard/.openclaw/agent-data.db"
+      ],
+      "description": "SQLite database for structured agent data"
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      },
+      "description": "Web search via Brave API"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "GitHub repos, issues, PRs — read and write"
+    },
+    "custom-agentorchard": {
+      "command": "python",
+      "args": ["/Users/agentorchard/.openclaw/mcp-servers/agentorchard-server.py"],
+      "env": {
+        "SUPABASE_URL": "${SUPABASE_URL}",
+        "SUPABASE_KEY": "${SUPABASE_SERVICE_KEY}"
+      },
+      "description": "Custom AgentOrchard tools — Supabase, content pipeline, agent coordination"
+    }
+  },
+  "_notes": {
+    "env_vars": "Use ${VAR_NAME} syntax for environment variable substitution",
+    "transport": "Default transport is stdio. For HTTP/SSE servers, use 'url' field instead of 'command'",
+    "http_example": {
+      "remote-server": {
+        "url": "http://localhost:8000/sse",
+        "description": "Remote MCP server via HTTP/SSE transport"
+      }
+    },
+    "restart": "Run 'openclaw gateway restart' after changing this file",
+    "verify": "Run 'openclaw mcp list-tools' to confirm servers loaded"
+  }
+}
