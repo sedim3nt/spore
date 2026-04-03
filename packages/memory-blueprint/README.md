@@ -1,98 +1,108 @@
-# Memory Blueprint — Agent Memory Architecture
+# Memory Blueprint — 4-Layer Agent Memory Architecture
 
-## The Core Problem
+**Version:** 2.0 | **Updated:** 2026-04-03
 
-Every Claude conversation starts fresh. Without a memory system, agents repeat research, forget preferences, and can't build on past work. This blueprint solves that.
+The production-tested memory system behind SpiritTree's 8-agent fleet. 19 sites built in 26 days with ~90% retention across 200+ sessions.
 
-## The 80/20 Rule of Agent Memory
+## The Problem
 
-80% of value comes from 20% of your memory architecture:
+Every agent session starts fresh. Without memory, agents repeat research, forget decisions, lose context, and can't compound work. Most memory solutions are either too simple (one file) or too complex (vector databases you can't audit).
 
-1. **Daily logs** — what happened today, decisions made, blockers
-2. **Curated long-term memory** — distilled facts that rarely change
-3. **Semantic search** — find relevant past context without manual retrieval
-
-Everything else (fancy graph databases, complex schemas, multi-tier hierarchies) is optimization you can add later.
-
-## Memory Architecture Overview
+## The 4-Layer Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    AGENT CONTEXT                        │
-│   (what fits in context window right now)               │
+│              Layer 4: autoDream (nightly)                │
+│   Consolidates daily noise → curated long-term memory   │
 ├─────────────────────────────────────────────────────────┤
-│                  HOT MEMORY (files)                     │
-│   MEMORY.md     — curated long-term facts               │
-│   YYYY-MM-DD.md — today's log                           │
-│   BULLETIN.md   — cross-agent announcements             │
+│         Layer 3: LCM (conversation compression)         │
+│   Summary DAG over all conversations. Expand on demand. │
 ├─────────────────────────────────────────────────────────┤
-│               WARM MEMORY (vector search)               │
-│   MuninnDB      — semantic search over past sessions    │
-│   Embeddings    — nomic-embed-text via Ollama           │
+│           Layer 2: Daily Logs (scratch pad)              │
+│   memory/YYYY-MM-DD.md — tasks, decisions, blockers     │
 ├─────────────────────────────────────────────────────────┤
-│              COLD MEMORY (structured data)              │
-│   Supabase      — content history, agent logs           │
-│   SQLite        — local structured agent data           │
+│         Layer 1: File-Based (loads at boot)              │
+│   MEMORY.md · AGENTS.md · SOUL.md · USER.md · etc.      │
 └─────────────────────────────────────────────────────────┘
 ```
 
+### Layer 1: File-Based Memory
+Plain text files that load automatically at session start. The cheapest, most reliable layer.
+
+- **MEMORY.md** — Curated decisions, policies, cron schedules, site inventory. The single source of truth.
+- **AGENTS.md** — Agent roles, coding patterns, retry policies, safety rules.
+- **SOUL.md** — Personality and values. Prevents drift across sessions.
+- **USER.md** — Who the human is. Background, preferences, communication style.
+
+**Key insight:** These aren't documentation. They're working memory. Update them constantly. An out-of-date memory file is worse than none.
+
+### Layer 2: Daily Logs
+`memory/YYYY-MM-DD.md` — Append-only scratch pad. Everything that happens today goes here. Messy by design. Temporary — wipe old logs periodically.
+
+### Layer 3: LCM (Lossless Context Management)
+OpenClaw plugin that compresses conversations into a summary DAG. Searchable, expandable. Handles the "200+ sessions" problem.
+
+**Recommended settings:**
+```json
+{
+  "plugins": {
+    "entries": {
+      "lossless-claw": {
+        "freshTailCount": 10,
+        "contextThreshold": 0.75
+      }
+    }
+  }
+}
+```
+
+### Layer 4: autoDream (Nightly Consolidation)
+A cron job that runs at 1:30 AM (or whenever your quiet period is). Reads the day's logs + LCM decisions, consolidates MEMORY.md, writes an audit trail.
+
+Inspired by biological memory — short-term memory consolidates into long-term memory during sleep.
+
+**Critical:** autoDream writes a STUB file first. If the dream log still says "STUB" after the cron window, consolidation failed. Use `heartbeat-verify.sh` to catch this.
+
 ## What's in This Package
 
-| File | What It Covers |
-|------|---------------|
-| `native-config.md` | OpenClaw memory search config (tune retrieval) |
-| `flush-tuning.md` | Pre-compaction flush settings (softThresholdTokens) |
-| `muninndb-setup.md` | MuninnDB install + MCP integration |
-| `BULLETIN.md` | Cross-agent announcement template |
-| `daily-log-template.md` | Standard daily log format |
-| `solutions-ranked.md` | 15 memory solutions compared |
+```
+memory-blueprint/
+├── README.md                 # This file
+├── MEMORY-TEMPLATE.md        # Starter MEMORY.md with sections
+├── autodream.sh              # autoDream cron script
+├── heartbeat-verify.sh       # Verify autoDream ran
+└── daily-log-template.md     # Daily log template
+```
 
 ## Quick Start
 
-### Minimum viable memory system (30 minutes)
+1. Copy `MEMORY-TEMPLATE.md` to your workspace as `MEMORY.md`
+2. Start filling in decisions, policies, cron schedules
+3. Add to AGENTS.md: "If it matters, write it down"
+4. Set up daily logs: create `memory/` directory
+5. Install LCM: `openclaw plugins install lossless-claw`
+6. Set up autoDream: copy `autodream.sh` to `scripts/`, create cron
 
-1. Create `MEMORY.md` in your workspace root
-2. Create `memory/` directory for daily logs
-3. Use `daily-log-template.md` format for daily logs
-4. Configure `softThresholdTokens` (see `flush-tuning.md`)
-5. Instruct agents to read `MEMORY.md` + today's log at session start
+## Production Results
 
-That's it. This alone prevents 80% of context loss.
+| Metric | Value |
+|--------|-------|
+| Sessions | 200+ |
+| Retention | ~90% |
+| MEMORY.md size | 7KB (curated, pruned weekly) |
+| LCM summaries | 591 |
+| LCM messages | 31,000+ |
+| autoDream frequency | Nightly |
+| Sites built with this stack | 19 in 26 days |
+| Agents using it | 8 |
 
-### Add vector search (2 hours)
+## Common Failures
 
-Follow `muninndb-setup.md` to wire up MuninnDB. Now agents can semantically search all past sessions.
+1. **MEMORY.md drift** — Decisions made in conversation but never written down. Fix: autoDream + "write it down" rule.
+2. **Phantom success** — autoDream reports success but never filled the stub. Fix: heartbeat verification.
+3. **Stale entries** — Old policies that no longer apply. Fix: weekly prune pass.
+4. **Log bloat** — Daily logs piling up forever. Fix: periodic wipe (keep last 7 days).
 
-### Add cross-agent coordination (1 hour)
+## License
 
-Use `BULLETIN.md` protocol so multiple agents share announcements without collision.
-
-## Session Startup Protocol
-
-Every agent session should begin with:
-
-```
-1. Read SOUL.md          (personality + operating principles)
-2. Read USER.md          (user preferences + background)
-3. Read memory/TODAY.md  (what happened today)
-4. Read memory/YESTERDAY.md (continuity)
-5. Read MEMORY.md        (curated long-term facts)
-6. Read BULLETIN.md      (cross-agent announcements)
-```
-
-Total: ~5-15K tokens. Worth every token.
-
-## Memory Write Discipline
-
-**Write when it matters:**
-- Decisions made (especially irreversible ones)
-- Preferences discovered about the user
-- Technical facts about the codebase or infrastructure
-- Failures and what caused them
-- External account IDs, credentials structure (not secrets)
-- Content published (title, platform, date)
-
-**Don't write:**
-- Routine completed tasks without lessons
-- Temporary state that doesn't compound
-- Summaries of summaries
+MIT — part of [Spore](https://github.com/sedim3nt/spore)
